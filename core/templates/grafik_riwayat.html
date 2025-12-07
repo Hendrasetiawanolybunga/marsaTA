@@ -34,6 +34,14 @@
                 <div class="chart-container">
                     <canvas id="zScoreChart"></canvas>
                 </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Keterangan Z-Score WHO:</strong><br>
+                        <span style="color: green;">Z > -2:</span> Normal<br>
+                        <span style="color: orange;">-3 &lt; Z &le; -2:</span> Risiko Stunting<br>
+                        <span style="color: red;">Z &le; -3:</span> Stunting
+                    </small>
+                </div>
             </div>
         </div>
     </div>
@@ -74,6 +82,37 @@
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     tension: 0.1,
                     pointRadius: 5
+                },
+                // WHO Standard Lines
+                {
+                    label: 'Batas Normal (Z = +2)',
+                    data: Array(dates.length).fill(2),
+                    borderColor: 'green',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Batas Normal (Z = 0)',
+                    data: Array(dates.length).fill(0),
+                    borderColor: 'orange',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Batas Stunting (Z = -2)',
+                    data: Array(dates.length).fill(-2),
+                    borderColor: 'red',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y'
                 }
             ]
         },
@@ -82,7 +121,8 @@
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true,
+                    min: -4,
+                    max: 4,
                     title: {
                         display: true,
                         text: 'Z-Score'

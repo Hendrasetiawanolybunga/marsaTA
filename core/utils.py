@@ -8,20 +8,33 @@ def hitung_dan_simpan_zscore(pengukuran_id):
     
     Args:
         pengukuran_id: ID dari objek PengukuranFisik yang baru diinput
+        
+    Returns:
+        Objek PengukuranFisik yang telah diupdate dengan Z-Score
     """
-    # Terima pengukuran_id dari objek PengukuranFisik yang baru diinput
-    pengukuran = PengukuranFisik.objects.get(id=pengukuran_id)
+    try:
+        # Terima pengukuran_id dari objek PengukuranFisik yang baru diinput
+        pengukuran = PengukuranFisik.objects.get(id=pengukuran_id)
+    except PengukuranFisik.DoesNotExist:
+        raise ValueError("Pengukuran tidak ditemukan")
     
-    # Ambil tanggalLahir, jenisKelamin (dari Pasien), beratBadan, dan tinggiBadan (dari PengukuranFisik)
-    pasien = pengukuran.pasien
-    tanggal_lahir = pasien.tanggalLahir
-    jenis_kelamin = pasien.jenisKelamin
-    berat_badan = float(pengukuran.beratBadan)
-    tinggi_badan = float(pengukuran.tinggiBadan)
-    tanggal_ukur = pengukuran.tanggalUkur
+    try:
+        # Ambil tanggalLahir, jenisKelamin (dari Pasien), beratBadan, dan tinggiBadan (dari PengukuranFisik)
+        pasien = pengukuran.pasien
+        tanggal_lahir = pasien.tanggalLahir
+        jenis_kelamin = pasien.jenisKelamin
+        berat_badan = float(pengukuran.beratBadan)
+        tinggi_badan = float(pengukuran.tinggiBadan)
+        tanggal_ukur = pengukuran.tanggalUkur
+    except (ValueError, AttributeError) as e:
+        raise ValueError(f"Data pengukuran tidak valid: {str(e)}")
     
     # Hitung Usia Anak dalam bulan (umur_bulan) dari tanggalLahir Pasien dan tanggalUkur
     umur_bulan = (tanggal_ukur.year - tanggal_lahir.year) * 12 + (tanggal_ukur.month - tanggal_lahir.month)
+    
+    # Validasi umur (harus positif)
+    if umur_bulan < 0:
+        raise ValueError("Tanggal pengukuran tidak valid")
     
     # Simulasi Lookup Tabel Z-Score: 
     # Tampilkan placeholder di kode yang menunjukkan bagaimana nilai SD (+2, -2, dll.) 
@@ -50,8 +63,11 @@ def hitung_dan_simpan_zscore(pengukuran_id):
         sd_tinggi = 0.15 * umur_bulan + 1.5
     
     # Hitung Z-Score menggunakan rumus: (nilai - median) / SD
-    z_score_bb_u = round((berat_badan - median_berat) / sd_berat, 2)
-    z_score_tb_u = round((tinggi_badan - median_tinggi) / sd_tinggi, 2)
+    try:
+        z_score_bb_u = round((berat_badan - median_berat) / sd_berat, 2)
+        z_score_tb_u = round((tinggi_badan - median_tinggi) / sd_tinggi, 2)
+    except ZeroDivisionError:
+        raise ValueError("Terjadi kesalahan dalam perhitungan Z-Score")
     
     # Batasi nilai Z-Score agar realistis (biasanya antara -3 dan +3)
     z_score_bb_u = max(min(z_score_bb_u, 3.0), -3.0)
@@ -72,9 +88,19 @@ def buat_jadwal_notifikasi(pasien_id, tanggal_pengukuran_terakhir):
     Args:
         pasien_id: ID pasien
         tanggal_pengukuran_terakhir: Tanggal pengukuran terakhir
+        
+    Returns:
+        Objek Notifikasi yang telah dibuat
     """
-    # Terima pasien_id dan tanggal pengukuran terakhir
-    pasien = Pasien.objects.get(id=pasien_id)
+    try:
+        # Terima pasien_id dan tanggal pengukuran terakhir
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        raise ValueError("Pasien tidak ditemukan")
+    
+    # Validasi tanggal
+    if not isinstance(tanggal_pengukuran_terakhir, date):
+        raise ValueError("Tanggal pengukuran tidak valid")
     
     # Logika Jadwal: Hitung tanggal pengukuran ulang berikutnya (misalnya, 30 hari setelah tanggal_pengukuran_terakhir)
     tanggal_pengukuran_ulang = tanggal_pengukuran_terakhir + timedelta(days=30)

@@ -43,15 +43,22 @@ def jalankan_inferensi(pasien_id, kode_gejala_input):
     """
     
     # Langkah 1: Inisiasi dan Pencatatan Konsultasi
-    pasien = Pasien.objects.get(id=pasien_id)
+    try:
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        raise ValueError("Pasien tidak ditemukan")
     
     # Buat objek Konsultasi baru
     konsultasi = Konsultasi.objects.create(pasien=pasien)
     
     # Catat semua kode_gejala_input ke dalam DetailKonsultasi
     for kode_gejala in kode_gejala_input:
-        gejala = Gejala.objects.get(kodeGejala=kode_gejala)
-        DetailKonsultasi.objects.create(konsultasi=konsultasi, gejala=gejala)
+        try:
+            gejala = Gejala.objects.get(kodeGejala=kode_gejala)
+            DetailKonsultasi.objects.create(konsultasi=konsultasi, gejala=gejala)
+        except Gejala.DoesNotExist:
+            # Lewati gejala yang tidak ditemukan
+            continue
     
     # Inisialisasi Working Memory (WM) dengan kode_gejala_input
     working_memory = set(kode_gejala_input)
@@ -82,14 +89,18 @@ def jalankan_inferensi(pasien_id, kode_gejala_input):
         if gejala_dibutuhkan.issubset(working_memory):
             # Aktivasi (Firing): Jika suatu kelompok aturan terpenuhi (match 100%)
             # Ambil kodeKondisi hasil
-            hasil_kondisi = Kondisi.objects.get(kodeKondisi=kode_kondisi)
-            
-            # Set hasilKondisi pada objek Konsultasi yang sedang berjalan
-            konsultasi.hasilKondisi = hasil_kondisi
-            
-            # Hentikan proses looping dan forward chaining karena tujuan (diagnosis) telah tercapai
-            diagnosis_ditemukan = True
-            break
+            try:
+                hasil_kondisi = Kondisi.objects.get(kodeKondisi=kode_kondisi)
+                
+                # Set hasilKondisi pada objek Konsultasi yang sedang berjalan
+                konsultasi.hasilKondisi = hasil_kondisi
+                
+                # Hentikan proses looping dan forward chaining karena tujuan (diagnosis) telah tercapai
+                diagnosis_ditemukan = True
+                break
+            except Kondisi.DoesNotExist:
+                # Jika kondisi tidak ditemukan, lanjutkan ke kelompok aturan berikutnya
+                continue
     
     # Output dan Penyimpanan
     # Simpan (.save()) objek Konsultasi yang sudah diisi hasilKondisi
@@ -243,7 +254,12 @@ def dashboard_pasien(request):
     
     # Ambil data Pasien yang sedang login
     pasien_id = request.session.get('pasien_id')
-    pasien = Pasien.objects.get(id=pasien_id)
+    try:
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        # Jika pasien tidak ditemukan, hapus sesi dan arahkan ke login
+        request.session.flush()
+        return redirect('login_pasien')
     
     # Tampilkan ucapan selamat datang dan tautan ke fungsi diagnostik
     context = {
@@ -251,6 +267,67 @@ def dashboard_pasien(request):
     }
     
     return render(request, 'dashboard_pasien.html', context)
+
+
+def edit_akun_pasien(request):
+    """
+    View untuk mengelola dan memperbarui informasi pribadi Pasien
+    """
+    # Pastikan pengguna sudah login (cek pasien_id di sesi)
+    if 'pasien_id' not in request.session:
+        return redirect('login_pasien')
+    
+    # Ambil data Pasien yang sedang login
+    pasien_id = request.session.get('pasien_id')
+    try:
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        # Jika pasien tidak ditemukan, hapus sesi dan arahkan ke login
+        request.session.flush()
+        return redirect('login_pasien')
+    
+    if request.method == 'GET':
+        # Metode GET: Tampilkan formulir yang sudah terisi dengan data Pasien saat ini
+        context = {
+            'pasien': pasien
+        }
+        return render(request, 'edit_akun_pasien.html', context)
+    
+    elif request.method == 'POST':
+        # Metode POST: Proses pembaruan data Pasien
+        nama = request.POST.get('nama')
+        nama_wali = request.POST.get('nama_wali')
+        nomor_telepon = request.POST.get('nomor_telepon')
+        kata_sandi_baru = request.POST.get('kata_sandi_baru')
+        
+        # Validasi data
+        if not nama:
+            context = {
+                'pasien': pasien,
+                'error': 'Nama tidak boleh kosong'
+            }
+            return render(request, 'edit_akun_pasien.html', context)
+        
+        # Update data pasien
+        pasien.nama = nama
+        pasien.namaWali = nama_wali or None
+        pasien.nomorTelepon = nomor_telepon or None
+        
+        # Jika bidang kataSandi_baru diisi, perbarui kata sandi dengan aman
+        if kata_sandi_baru:
+            if len(kata_sandi_baru) < 6:
+                context = {
+                    'pasien': pasien,
+                    'error': 'Kata sandi minimal 6 karakter'
+                }
+                return render(request, 'edit_akun_pasien.html', context)
+            pasien.set_password(kata_sandi_baru)
+        
+        # Simpan perubahan
+        pasien.save()
+        
+        # Berikan pesan sukses dan redirect ke dashboard
+        return redirect('dashboard_pasien')
 
 
 # PROMPT #5: Data Klinis (Input, Z-Score Akurat, & Grafik)
@@ -422,7 +499,13 @@ def detail_pasien_pakar(request, pasien_id):
     View untuk menampilkan ringkasan data Pasien untuk Pakar
     """
     # Ambil data pasien
-    pasien = Pasien.objects.get(id=pasien_id)
+    try:
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        # Jika pasien tidak ditemukan, tampilkan pesan error
+        return render(request, 'pakar_list_patients.html', {
+            'error': 'Pasien tidak ditemukan'
+        })
     
     # Ambil semua data PengukuranFisik
     pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')

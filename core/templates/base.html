@@ -26,7 +26,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/">Sistem Diagnosa Stunting</a>
+            <a class="navbar-brand" href="{% url 'home' %}">Sistem Diagnosa Stunting</a>
             
             <!-- Mobile Toggle Button -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -56,7 +56,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin:logout' %}">Logout Pakar</a>
                         </li>
-                    {% elif request.session.pasien_id %}
+                    {% elif 'pasien_id' in request.session %}
                         <!-- Patient Navigation -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">

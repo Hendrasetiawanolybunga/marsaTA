@@ -11,6 +11,7 @@ urlpatterns = [
     path('login/', views.login_pasien, name='login_pasien'),
     path('logout/', views.logout_pasien, name='logout_pasien'),
     path('dashboard/', views.dashboard_pasien, name='dashboard_pasien'),
+    path('akun/edit/', views.edit_akun_pasien, name='edit_akun_pasien'),
     
     # Anthropometric measurement paths
     path('pengukuran/input/', views.input_pengukuran, name='input_pengukuran'),
