@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistem Diagnosa Stunting{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            padding-top: 60px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sistem Diagnosa Stunting</a>
+            
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Role-based navigation will be added here -->
+                </ul>
+                
+                <!-- Right-aligned items -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated and user.is_staff %}
+                        <!-- Staff Navigation -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Panel Pakar
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'list_patients_pakar' %}">Daftar Pasien</a></li>
+                                <li><a class="dropdown-item" href="{% url 'list_rules_pakar' %}">Daftar Aturan</a></li>
+                                <li><a class="dropdown-item" href="{% url 'create_rule_group' %}">Buat Aturan Baru</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:logout' %}">Logout Pakar</a>
+                        </li>
+                    {% elif request.session.pasien_id %}
+                        <!-- Patient Navigation -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Menu Pasien
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'dashboard_pasien' %}">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'input_pengukuran' %}">Input Pengukuran</a></li>
+                                <li><a class="dropdown-item" href="{% url 'form_diagnosa' %}">Diagnosa Stunting</a></li>
+                                <li><a class="dropdown-item" href="{% url 'tampilkan_grafik_riwayat' pasien_id=request.session.pasien_id %}">Grafik Pertumbuhan</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout_pasien' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <!-- Guest Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login_pasien' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'registrasi_pasien' %}">Registrasi</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        {% block content %}
+        <!-- Page content will be placed here -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Sistem Diagnosa Stunting. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

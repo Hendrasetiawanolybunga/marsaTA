@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Pasien - Sistem Diagnosa Stunting{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Dashboard Pasien</h1>
+        <p class="lead">Halo {{ pasien.nama }}, selamat datang di sistem diagnosa stunting.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Diagnosa Stunting</h3>
+            </div>
+            <div class="card-body">
+                <p>Lakukan diagnosa stunting untuk balita/anak Anda berdasarkan gejala yang diamati.</p>
+                <a href="{% url 'form_diagnosa' %}" class="btn btn-primary">Mulai Diagnosa</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Pengukuran Fisik</h3>
+            </div>
+            <div class="card-body">
+                <p>Input data pengukuran fisik dan lihat riwayat pertumbuhan anak Anda.</p>
+                <a href="{% url 'input_pengukuran' %}" class="btn btn-primary">Input Pengukuran</a>
+                <a href="{% url 'tampilkan_grafik_riwayat' pasien.id %}" class="btn btn-outline-secondary">Lihat Grafik</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Profil Pasien</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nama:</strong> {{ pasien.nama }}</p>
+                        <p><strong>Jenis Kelamin:</strong> {{ pasien.get_jenisKelamin_display }}</p>
+                        <p><strong>Tanggal Lahir:</strong> {{ pasien.tanggalLahir }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Nama Wali:</strong> {{ pasien.namaWali|default:"-" }}</p>
+                        <p><strong>Nomor Telepon:</strong> {{ pasien.nomorTelepon|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

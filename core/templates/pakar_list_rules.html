@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Aturan - Panel Pakar{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Daftar Aturan</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">Daftar Aturan</li>
+            </ol>
+        </nav>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+            <a href="{% url 'create_rule_group' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Buat Kelompok Aturan Baru
+            </a>
+        </div>
+        
+        {% for key, aturan_list in aturan_kelompok.items %}
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Kelompok Aturan: {{ key.0 }}</h5>
+                <p class="mb-0">Kondisi: {{ key.1.kodeKondisi }} - {{ key.1.namaKondisi }}</p>
+            </div>
+            <div class="card-body">
+                <h6>Gejala yang Dibutuhkan:</h6>
+                <ul class="list-group">
+                    {% for aturan in aturan_list %}
+                    <li class="list-group-item">
+                        {{ aturan.gejala.kodeGejala }} - {{ aturan.gejala.namaGejala }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">
+            <p class="mb-0">Tidak ada aturan yang tersedia.</p>
+            <p class="mb-0"><a href="{% url 'create_rule_group' %}">Buat kelompok aturan baru</a>.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

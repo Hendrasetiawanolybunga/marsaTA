@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Hasil Diagnosa - Sistem Diagnosa Stunting{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Hasil Diagnosa</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard_pasien' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'form_diagnosa' %}">Diagnosa Stunting</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Hasil Diagnosa</li>
+            </ol>
+        </nav>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Diagnosis: {{ kondisi.namaKondisi }}</h3>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Kode Kondisi:</dt>
+                    <dd class="col-sm-9">{{ kondisi.kodeKondisi }}</dd>
+                    
+                    <dt class="col-sm-3">Deskripsi:</dt>
+                    <dd class="col-sm-9">{{ kondisi.deskripsi }}</dd>
+                    
+                    <dt class="col-sm-3">Solusi:</dt>
+                    <dd class="col-sm-9">{{ kondisi.solusi }}</dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <strong>Tanggal Konsultasi:</strong> {{ konsultasi.tanggalKonsultasi }}
+        </div>
+        
+        <div class="mt-3">
+            <a href="{% url 'dashboard_pasien' %}" class="btn btn-primary">Kembali ke Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

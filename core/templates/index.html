@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Beranda - Sistem Diagnosa Stunting{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4">Selamat Datang di Sistem Diagnosa Stunting</h1>
+        <p class="lead">Sistem Pendukung Keputusan untuk Mendeteksi Stunting pada Balita</p>
+        
+        {% if not user.is_authenticated and not request.session.pasien_id %}
+        <div class="mt-5">
+            <h2>Mulai Sekarang</h2>
+            <p>Silakan masuk atau daftar untuk menggunakan sistem diagnosa stunting.</p>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{% url 'login_pasien' %}" class="btn btn-primary btn-lg px-4 me-md-2">Masuk</a>
+                <a href="{% url 'registrasi_pasien' %}" class="btn btn-outline-secondary btn-lg px-4">Daftar</a>
+            </div>
+        </div>
+        {% elif user.is_authenticated and user.is_staff %}
+        <div class="mt-5">
+            <h2>Panel Pakar</h2>
+            <p>Anda telah login sebagai pakar. Silakan akses panel administrasi.</p>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{% url 'list_patients_pakar' %}" class="btn btn-primary btn-lg px-4">Daftar Pasien</a>
+                <a href="{% url 'list_rules_pakar' %}" class="btn btn-outline-secondary btn-lg px-4">Daftar Aturan</a>
+            </div>
+        </div>
+        {% elif request.session.pasien_id %}
+        <div class="mt-5">
+            <h2>Dashboard Pasien</h2>
+            <p>Anda telah login sebagai pasien. Silakan akses dashboard Anda.</p>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{% url 'dashboard_pasien' %}" class="btn btn-primary btn-lg px-4">Dashboard</a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="mt-5">
+            <h2>Tentang Stunting</h2>
+            <p>Stunting adalah kondisi gagal tumbuh pada anak balita akibat kurang gizi kronis. 
+            Kondisi ini ditandai dengan tinggi badan anak yang lebih pendek dibandingkan anak seusianya.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

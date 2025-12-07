@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Form Diagnosa Stunting - Sistem Diagnosa Stunting{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Form Diagnosa Stunting</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard_pasien' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Diagnosa Stunting</li>
+            </ol>
+        </nav>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Pilih Gejala yang Dialami</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        {% for gejala in gejala_list %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="gejala_{{ gejala.kodeGejala }}" name="gejala" value="{{ gejala.kodeGejala }}">
+                            <label class="form-check-label" for="gejala_{{ gejala.kodeGejala }}">
+                                {{ gejala.kodeGejala }} - {{ gejala.namaGejala }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Diagnosa</button>
+                    <a href="{% url 'dashboard_pasien' %}" class="btn btn-secondary">Batal</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
