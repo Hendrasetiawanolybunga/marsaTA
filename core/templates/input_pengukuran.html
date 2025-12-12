@@ -27,26 +27,88 @@
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="mb-3">
-                        <label for="tanggal_ukur" class="form-label">Tanggal Pengukuran</label>
-                        <input type="date" class="form-control" id="tanggal_ukur" name="tanggal_ukur" required>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Data Antropometri Utama</h5>
+                            
+                            <div class="mb-3">
+                                <label for="tanggal_ukur" class="form-label">Tanggal Pengukuran</label>
+                                <input type="date" class="form-control" id="tanggal_ukur" name="tanggal_ukur" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="berat_badan" class="form-label">Berat Badan (kg)</label>
+                                <input type="number" class="form-control" id="berat_badan" name="berat_badan" step="0.01" min="0" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tinggi_badan" class="form-label">Tinggi/Panjang Badan (cm)</label>
+                                <input type="number" class="form-control" id="tinggi_badan" name="tinggi_badan" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Data Tambahan Posyandu</h5>
+                            
+                            <div class="mb-3">
+                                <label for="lingkar_kepala" class="form-label">Lingkar Kepala (cm)</label>
+                                <input type="number" class="form-control" id="lingkar_kepala" name="lingkar_kepala" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lingkar_lengan" class="form-label">Lingkar Lengan Atas (cm)</label>
+                                <input type="number" class="form-control" id="lingkar_lengan" name="lingkar_lengan" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="imunisasi" class="form-label">Status Imunisasi</label>
+                                <input type="text" class="form-control" id="imunisasi" name="imunisasi" placeholder="Contoh: Lengkap, Belum Lengkap">
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="berat_badan" class="form-label">Berat Badan (kg)</label>
-                        <input type="number" class="form-control" id="berat_badan" name="berat_badan" step="0.01" min="0" required>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Simpan Pengukuran</button>
+                        <a href="{% url 'dashboard_pasien' %}" class="btn btn-secondary">Batal</a>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="tinggi_badan" class="form-label">Tinggi/Panjang Badan (cm)</label>
-                        <input type="number" class="form-control" id="tinggi_badan" name="tinggi_badan" step="0.01" min="0" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Simpan Pengukuran</button>
-                    <a href="{% url 'dashboard_pasien' %}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
         </div>
+        
+        <!-- Riwayat Pengukuran -->
+        {% if pengukuran_list %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Riwayat Pengukuran</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Berat (kg)</th>
+                                <th>Tinggi (cm)</th>
+                                <th>Lingkar Kepala</th>
+                                <th>Imunisasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pengukuran in pengukuran_list %}
+                            <tr>
+                                <td>{{ pengukuran.tanggalUkur }}</td>
+                                <td>{{ pengukuran.beratBadan }}</td>
+                                <td>{{ pengukuran.tinggiBadan }}</td>
+                                <td>{{ pengukuran.lingkarKepala|default:"-" }}</td>
+                                <td>{{ pengukuran.imunisasi|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -58,7 +58,7 @@ class AuthViewsTest(TestCase):
         # Now access dashboard
         response = self.client.get(reverse('dashboard_pasien'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Selamat datang")
+        self.assertContains(response, "selamat datang")
         self.assertContains(response, "Test User")
 
 

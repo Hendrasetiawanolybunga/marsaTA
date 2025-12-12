@@ -14,30 +14,69 @@
             </ol>
         </nav>
         
+        {% if error %}
+        <div class="alert alert-warning">
+            <strong>Perhatian:</strong> {{ error }}
+        </div>
+        {% endif %}
+        
+        {% if kondisi %}
         <div class="card mb-4">
-            <div class="card-header">
-                <h3>Diagnosis: {{ kondisi.namaKondisi }}</h3>
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Hasil Diagnosa: {{ kondisi.namaKondisi }}</h3>
             </div>
             <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-3">Kode Kondisi:</dt>
-                    <dd class="col-sm-9">{{ kondisi.kodeKondisi }}</dd>
-                    
-                    <dt class="col-sm-3">Deskripsi:</dt>
-                    <dd class="col-sm-9">{{ kondisi.deskripsi }}</dd>
-                    
-                    <dt class="col-sm-3">Solusi:</dt>
-                    <dd class="col-sm-9">{{ kondisi.solusi }}</dd>
-                </dl>
+                <div class="alert alert-info">
+                    <strong>Diagnosis Berhasil!</strong> Berikut adalah hasil diagnosa berdasarkan gejala yang Anda pilih.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Deskripsi</h5>
+                        <p>{{ kondisi.deskripsi }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h5>Solusi</h5>
+                        <p>{{ kondisi.solusi }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="alert alert-info">
-            <strong>Tanggal Konsultasi:</strong> {{ konsultasi.tanggalKonsultasi }}
+        {% else %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h3 class="mb-0">Hasil Diagnosa: Tidak Ditemukan</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Informasi:</strong> Berdasarkan gejala yang Anda pilih, sistem tidak dapat menemukan pola yang cocok dengan kondisi stunting yang diketahui. Silakan konsultasi dengan tenaga kesehatan untuk evaluasi lebih lanjut.
+                </div>
+            </div>
         </div>
+        {% endif %}
         
-        <div class="mt-3">
-            <a href="{% url 'dashboard_pasien' %}" class="btn btn-primary">Kembali ke Dashboard</a>
+        <div class="card">
+            <div class="card-header">
+                <h5>Informasi Tambahan</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Tanggal Konsultasi:</strong> {{ konsultasi.tanggalKonsultasi }}</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p><strong>ID Konsultasi:</strong> #{{ konsultasi.id }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <a href="{% url 'dashboard_pasien' %}" class="btn btn-primary">Kembali ke Dashboard</a>
+                    <a href="{% url 'form_diagnosa' %}" class="btn btn-outline-secondary">Diagnosa Ulang</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

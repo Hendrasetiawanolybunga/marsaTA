@@ -20,7 +20,12 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING('Group Pakar Diagnosa already exists'))
 
-        # Assign permissions to Pakar Diagnosa group
+        # Assign permissions to Admin System group (full access to all models)
+        admin_permissions = Permission.objects.all()
+        admin_group.permissions.set(admin_permissions)
+        self.stdout.write(self.style.SUCCESS('Assigned all permissions to Admin System group'))
+
+        # Assign permissions to Pakar Diagnosa group (limited access to patient data and full access to KB)
         # Get content types for core models
         pasien_ct = ContentType.objects.get_for_model(Pasien)
         konsultasi_ct = ContentType.objects.get_for_model(Konsultasi)
@@ -30,10 +35,13 @@ class Command(BaseCommand):
         aturan_ct = ContentType.objects.get_for_model(Aturan)
         pengukuran_ct = ContentType.objects.get_for_model(PengukuranFisik)
 
-        # Permissions for Pakar Diagnosa group
+        # Permissions for Pakar Diagnosa group (view, add, change for patient data but NOT delete)
+        # Full access to knowledge base models (Gejala, Kondisi, Aturan)
         pakar_permissions = [
-            # Pasien permissions
+            # Pasien permissions (view, add, change but NOT delete)
             Permission.objects.get(content_type=pasien_ct, codename='view_pasien'),
+            Permission.objects.get(content_type=pasien_ct, codename='add_pasien'),
+            Permission.objects.get(content_type=pasien_ct, codename='change_pasien'),
             
             # Konsultasi permissions
             Permission.objects.get(content_type=konsultasi_ct, codename='view_konsultasi'),
@@ -45,20 +53,23 @@ class Command(BaseCommand):
             Permission.objects.get(content_type=detail_konsultasi_ct, codename='change_detailkonsultasi'),
             Permission.objects.get(content_type=detail_konsultasi_ct, codename='add_detailkonsultasi'),
             
-            # Gejala permissions
+            # Gejala permissions (full management)
             Permission.objects.get(content_type=gejala_ct, codename='view_gejala'),
             Permission.objects.get(content_type=gejala_ct, codename='change_gejala'),
             Permission.objects.get(content_type=gejala_ct, codename='add_gejala'),
+            Permission.objects.get(content_type=gejala_ct, codename='delete_gejala'),
             
-            # Kondisi permissions
+            # Kondisi permissions (full management)
             Permission.objects.get(content_type=kondisi_ct, codename='view_kondisi'),
             Permission.objects.get(content_type=kondisi_ct, codename='change_kondisi'),
             Permission.objects.get(content_type=kondisi_ct, codename='add_kondisi'),
+            Permission.objects.get(content_type=kondisi_ct, codename='delete_kondisi'),
             
-            # Aturan permissions
+            # Aturan permissions (full management)
             Permission.objects.get(content_type=aturan_ct, codename='view_aturan'),
             Permission.objects.get(content_type=aturan_ct, codename='change_aturan'),
             Permission.objects.get(content_type=aturan_ct, codename='add_aturan'),
+            Permission.objects.get(content_type=aturan_ct, codename='delete_aturan'),
             
             # PengukuranFisik permissions
             Permission.objects.get(content_type=pengukuran_ct, codename='view_pengukuranfisik'),
@@ -68,29 +79,29 @@ class Command(BaseCommand):
 
         # Clear existing permissions and set new ones for Pakar Diagnosa group
         expert_group.permissions.set(pakar_permissions)
-        self.stdout.write(self.style.SUCCESS('Assigned permissions to Pakar Diagnosa group'))
+        self.stdout.write(self.style.SUCCESS('Assigned appropriate permissions to Pakar Diagnosa group'))
 
-        # Create Admin User
+        # Create Admin User (Superuser)
         admin_user, created = User.objects.get_or_create(username='admin')
         if created:
             admin_user.set_password('admin123')
             admin_user.is_staff = True
-            admin_user.is_superuser = True
+            admin_user.is_superuser = True  # Admin is superuser
             admin_user.save()
             admin_user.groups.add(admin_group)
-            self.stdout.write(self.style.SUCCESS('Created admin user: admin/admin123'))
+            self.stdout.write(self.style.SUCCESS('Created admin user: admin/admin123 (Superuser)'))
         else:
             self.stdout.write(self.style.WARNING('Admin user already exists'))
 
-        # Create Expert User
+        # Create Expert User (Staff but NOT superuser)
         expert_user, created = User.objects.get_or_create(username='pakar')
         if created:
             expert_user.set_password('pakar123')
-            expert_user.is_staff = True
-            expert_user.is_superuser = False
+            expert_user.is_staff = True       # Expert is staff
+            expert_user.is_superuser = False  # Expert is NOT superuser
             expert_user.save()
             expert_user.groups.add(expert_group)
-            self.stdout.write(self.style.SUCCESS('Created expert user: pakar/pakar123'))
+            self.stdout.write(self.style.SUCCESS('Created expert user: pakar/pakar123 (Staff, NOT Superuser)'))
         else:
             self.stdout.write(self.style.WARNING('Expert user already exists'))
 

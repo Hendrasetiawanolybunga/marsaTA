@@ -147,17 +147,32 @@ def tampilkan_hasil_diagnosa(request, konsultasi_id):
     if 'pasien_id' not in request.session:
         return redirect('login_pasien')
     
-    # Ambil objek Konsultasi berdasarkan konsultasi_id
-    konsultasi = Konsultasi.objects.select_related('hasilKondisi').get(id=konsultasi_id)
+    try:
+        # Ambil objek Konsultasi berdasarkan konsultasi_id
+        konsultasi = Konsultasi.objects.select_related('hasilKondisi').get(id=konsultasi_id)
+    except Konsultasi.DoesNotExist:
+        # Jika konsultasi tidak ditemukan, redirect ke dashboard dengan pesan error
+        return render(request, 'dashboard_pasien.html', {
+            'error': 'Data konsultasi tidak ditemukan'
+        })
     
     # Ambil objek Kondisi yang menjadi hasil diagnosa
     kondisi = konsultasi.hasilKondisi
     
-    # Siapkan konteks untuk template
-    context = {
-        'konsultasi': konsultasi,
-        'kondisi': kondisi,
-    }
+    # Jika tidak ada hasil diagnosa
+    if not kondisi:
+        # Siapkan konteks untuk template dengan pesan bahwa tidak ada hasil
+        context = {
+            'konsultasi': konsultasi,
+            'kondisi': None,
+            'error': 'Tidak ada hasil diagnosa ditemukan untuk konsultasi ini'
+        }
+    else:
+        # Siapkan konteks untuk template
+        context = {
+            'konsultasi': konsultasi,
+            'kondisi': kondisi,
+        }
     
     # Tampilkan namaKondisi, deskripsi, dan solusi dari hasil diagnosa tersebut
     return render(request, 'hasil_diagnosa.html', context)
@@ -341,36 +356,85 @@ def input_pengukuran(request):
     
     # Ambil pasien yang sedang login
     pasien_id = request.session.get('pasien_id')
-    pasien = Pasien.objects.get(id=pasien_id)
+    try:
+        pasien = Pasien.objects.get(id=pasien_id)
+    except Pasien.DoesNotExist:
+        request.session.flush()
+        return redirect('login_pasien')
     
     if request.method == 'GET':
         # Metode GET: Tampilkan formulir untuk input tanggalUkur, beratBadan, dan tinggiBadan
-        return render(request, 'input_pengukuran.html')
+        # Ambil riwayat pengukuran untuk ditampilkan
+        pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]  # 5 terakhir
+        return render(request, 'input_pengukuran.html', {'pengukuran_list': pengukuran_list})
     
     elif request.method == 'POST':
         # Metode POST: Validasi input dan buat objek PengukuranFisik baru
         tanggal_ukur = request.POST.get('tanggal_ukur')
         berat_badan = request.POST.get('berat_badan')
         tinggi_badan = request.POST.get('tinggi_badan')
+        lingkar_kepala = request.POST.get('lingkar_kepala')
+        lingkar_lengan = request.POST.get('lingkar_lengan')
+        imunisasi = request.POST.get('imunisasi')
         
         # Validasi input
         if not all([tanggal_ukur, berat_badan, tinggi_badan]):
+            pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
             return render(request, 'input_pengukuran.html', {
-                'error': 'Semua field harus diisi',
-                'pasien': pasien
+                'error': 'Field wajib (tanggal ukur, berat badan, tinggi badan) harus diisi',
+                'pengukuran_list': pengukuran_list
             })
         
         try:
+            # Validasi format tanggal
+            from datetime import datetime, date
+            tanggal_ukur_date = datetime.strptime(tanggal_ukur, '%Y-%m-%d').date()
+            
+            # Validasi bahwa tanggal tidak di masa depan
+            if tanggal_ukur_date > date.today():
+                pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
+                return render(request, 'input_pengukuran.html', {
+                    'error': 'Tanggal pengukuran tidak boleh di masa depan',
+                    'pengukuran_list': pengukuran_list
+                })
+            
+            # Validasi bahwa tanggal tidak sebelum tanggal lahir pasien
+            if tanggal_ukur_date < pasien.tanggalLahir:
+                pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
+                return render(request, 'input_pengukuran.html', {
+                    'error': 'Tanggal pengukuran tidak boleh sebelum tanggal lahir pasien',
+                    'pengukuran_list': pengukuran_list
+                })
+            
             # Buat objek PengukuranFisik baru, hubungkan dengan Pasien yang sedang login
-            pengukuran = PengukuranFisik.objects.create(
-                pasien=pasien,
-                tanggalUkur=tanggal_ukur,
-                beratBadan=berat_badan,
-                tinggiBadan=tinggi_badan
-            )
+            pengukuran_data = {
+                'pasien': pasien,
+                'tanggalUkur': tanggal_ukur,
+                'beratBadan': berat_badan,
+                'tinggiBadan': tinggi_badan,
+            }
+            
+            # Tambahkan field opsional jika ada
+            if lingkar_kepala:
+                pengukuran_data['lingkarKepala'] = lingkar_kepala
+            if lingkar_lengan:
+                pengukuran_data['lingkarLengan'] = lingkar_lengan
+            if imunisasi:
+                pengukuran_data['imunisasi'] = imunisasi
+            
+            pengukuran = PengukuranFisik.objects.create(**pengukuran_data)
             
             # Segera panggil hitung_dan_simpan_zscore(pengukuran_id) pada objek baru tersebut
-            hitung_dan_simpan_zscore(pengukuran.id)
+            try:
+                hitung_dan_simpan_zscore(pengukuran.id)
+            except ValueError as e:
+                # Jika ada error dalam perhitungan Z-score, hapus pengukuran dan tampilkan error
+                pengukuran.delete()
+                pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
+                return render(request, 'input_pengukuran.html', {
+                    'error': f'Error dalam perhitungan Z-score: {str(e)}',
+                    'pengukuran_list': pengukuran_list
+                })
             
             # Panggil buat_jadwal_notifikasi(pasien_id, tanggal_pengukuran_terakhir) 
             # untuk menjadwalkan pengukuran berikutnya
@@ -379,10 +443,17 @@ def input_pengukuran(request):
             # Redirect ke dashboard atau halaman grafik
             return redirect('tampilkan_grafik_riwayat', pasien_id=pasien_id)
             
+        except ValueError as e:
+            pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
+            return render(request, 'input_pengukuran.html', {
+                'error': f'Format tanggal tidak valid: {str(e)}',
+                'pengukuran_list': pengukuran_list
+            })
         except Exception as e:
+            pengukuran_list = PengukuranFisik.objects.filter(pasien=pasien).order_by('-tanggalUkur')[:5]
             return render(request, 'input_pengukuran.html', {
                 'error': f'Terjadi kesalahan: {str(e)}',
-                'pasien': pasien
+                'pengukuran_list': pengukuran_list
             })
 
 
@@ -542,3 +613,36 @@ def list_rules_pakar(request):
     return render(request, 'pakar_list_rules.html', {
         'aturan_kelompok': dict(aturan_kelompok)
     })
+
+
+# Custom login view for experts
+def login_pakar(request):
+    """
+    View khusus untuk login Pakar Diagnosa
+    """
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            # Check if user is staff and belongs to "Pakar Diagnosa" group
+            if user.is_staff and user.groups.filter(name='Pakar Diagnosa').exists():
+                login(request, user)
+                # Redirect to pakar patients list
+                return redirect('list_patients_pakar')
+            else:
+                # User is not authorized as expert
+                return render(request, 'login_pakar.html', {
+                    'error': 'Anda tidak memiliki izin untuk mengakses halaman ini.'
+                })
+        else:
+            # Invalid credentials
+            return render(request, 'login_pakar.html', {
+                'error': 'Username atau password salah.'
+            })
+    
+    # GET request - show login form
+    return render(request, 'login_pakar.html')

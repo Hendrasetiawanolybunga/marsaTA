@@ -9,6 +9,7 @@ urlpatterns = [
     # Authentication paths
     path('registrasi/', views.registrasi_pasien, name='registrasi_pasien'),
     path('login/', views.login_pasien, name='login_pasien'),
+    path('pakar/login/', views.login_pakar, name='login_pakar'),  # Expert login path
     path('logout/', views.logout_pasien, name='logout_pasien'),
     path('dashboard/', views.dashboard_pasien, name='dashboard_pasien'),
     path('akun/edit/', views.edit_akun_pasien, name='edit_akun_pasien'),

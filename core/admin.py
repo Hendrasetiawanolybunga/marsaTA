@@ -1,12 +1,90 @@
 from django.contrib import admin
+from django.http import HttpResponseForbidden
 from .models import Pasien, Gejala, Kondisi, Aturan, Konsultasi, DetailKonsultasi, PengukuranFisik, Notifikasi
 
-# Register your models here.
-admin.site.register(Pasien)
-admin.site.register(Gejala)
-admin.site.register(Kondisi)
-admin.site.register(Aturan)
-admin.site.register(Konsultasi)
-admin.site.register(DetailKonsultasi)
-admin.site.register(PengukuranFisik)
-admin.site.register(Notifikasi)
+# Custom ModelAdmin classes with role-based access control
+class RestrictedModelAdmin(admin.ModelAdmin):
+    """
+    Base ModelAdmin class that restricts access to only Pakar Diagnosa group members
+    Superusers (Admin) are not allowed to access these models
+    """
+    def has_module_permission(self, request):
+        # Allow access only if user is staff and belongs to "Pakar Diagnosa" group
+        # Superusers (Admin) are not allowed
+        if request.user.is_authenticated and request.user.is_staff:
+            if request.user.is_superuser:
+                # Superusers (Admin) are not allowed to access KB models
+                return False
+            elif request.user.groups.filter(name='Pakar Diagnosa').exists():
+                # Pakar Diagnosa can access
+                return True
+        return False
+    
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+    
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
+    
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+    
+    def has_delete_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+# Register models with restricted access for knowledge base models
+@admin.register(Gejala)
+class GejalaAdmin(RestrictedModelAdmin):
+    list_display = ('kodeGejala', 'namaGejala')
+    search_fields = ('kodeGejala', 'namaGejala')
+    ordering = ('kodeGejala',)
+
+@admin.register(Kondisi)
+class KondisiAdmin(RestrictedModelAdmin):
+    list_display = ('kodeKondisi', 'namaKondisi')
+    search_fields = ('kodeKondisi', 'namaKondisi')
+    ordering = ('kodeKondisi',)
+
+@admin.register(Aturan)
+class AturanAdmin(RestrictedModelAdmin):
+    list_display = ('kodeKelompokAturan', 'kondisi', 'gejala')
+    list_filter = ('kodeKelompokAturan', 'kondisi')
+    search_fields = ('kodeKelompokAturan', 'kondisi__namaKondisi', 'gejala__namaGejala')
+    ordering = ('kodeKelompokAturan', 'kondisi', 'gejala')
+
+# Register other models with default access (accessible by both Admin and Pakar)
+@admin.register(Pasien)
+class PasienAdmin(admin.ModelAdmin):
+    list_display = ('nama', 'namaPengguna', 'jenisKelamin', 'tanggalLahir', 'namaWali')
+    list_filter = ('jenisKelamin', 'tanggalLahir')
+    search_fields = ('nama', 'namaPengguna', 'namaWali')
+    ordering = ('nama',)
+
+@admin.register(Konsultasi)
+class KonsultasiAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pasien', 'tanggalKonsultasi', 'hasilKondisi')
+    list_filter = ('tanggalKonsultasi', 'hasilKondisi')
+    search_fields = ('pasien__nama', 'hasilKondisi__namaKondisi')
+    ordering = ('-tanggalKonsultasi',)
+    date_hierarchy = 'tanggalKonsultasi'
+
+@admin.register(DetailKonsultasi)
+class DetailKonsultasiAdmin(admin.ModelAdmin):
+    list_display = ('konsultasi', 'gejala')
+    list_filter = ('gejala',)
+    search_fields = ('konsultasi__pasien__nama', 'gejala__namaGejala')
+
+@admin.register(PengukuranFisik)
+class PengukuranFisikAdmin(admin.ModelAdmin):
+    list_display = ('pasien', 'tanggalUkur', 'beratBadan', 'tinggiBadan', 'skor_Z_BB_U', 'skor_Z_TB_U')
+    list_filter = ('tanggalUkur', 'pasien__jenisKelamin')
+    search_fields = ('pasien__nama',)
+    ordering = ('-tanggalUkur',)
+    date_hierarchy = 'tanggalUkur'
+
+@admin.register(Notifikasi)
+class NotifikasiAdmin(admin.ModelAdmin):
+    list_display = ('pasien', 'judul', 'jadwalNotifikasi', 'sudahTerkirim', 'tipe')
+    list_filter = ('sudahTerkirim', 'tipe', 'jadwalNotifikasi')
+    search_fields = ('pasien__nama', 'judul')
+    ordering = ('-jadwalNotifikasi',)

@@ -32,9 +32,13 @@ def hitung_dan_simpan_zscore(pengukuran_id):
     # Hitung Usia Anak dalam bulan (umur_bulan) dari tanggalLahir Pasien dan tanggalUkur
     umur_bulan = (tanggal_ukur.year - tanggal_lahir.year) * 12 + (tanggal_ukur.month - tanggal_lahir.month)
     
-    # Validasi umur (harus positif)
+    # Validasi umur (harus positif dan masuk akal)
     if umur_bulan < 0:
-        raise ValueError("Tanggal pengukuran tidak valid")
+        raise ValueError("Tanggal pengukuran tidak valid - tanggal pengukuran sebelum tanggal lahir pasien")
+    
+    # Validasi umur tidak terlalu besar (misalnya lebih dari 20 tahun)
+    if umur_bulan > 240:  # 20 tahun
+        raise ValueError("Tanggal pengukuran tidak valid - usia anak terlalu besar")
     
     # Simulasi Lookup Tabel Z-Score: 
     # Tampilkan placeholder di kode yang menunjukkan bagaimana nilai SD (+2, -2, dll.) 

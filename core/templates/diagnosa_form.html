@@ -16,24 +16,45 @@
         <div class="card">
             <div class="card-header">
                 <h5>Pilih Gejala yang Dialami</h5>
+                <p class="mb-0">Silakan centang gejala yang sesuai dengan kondisi balita/anak Anda saat ini.</p>
             </div>
             <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="mb-3">
+                    <div class="row">
                         {% for gejala in gejala_list %}
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="gejala_{{ gejala.kodeGejala }}" name="gejala" value="{{ gejala.kodeGejala }}">
-                            <label class="form-check-label" for="gejala_{{ gejala.kodeGejala }}">
-                                {{ gejala.kodeGejala }} - {{ gejala.namaGejala }}
-                            </label>
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gejala_{{ gejala.kodeGejala }}" name="gejala" value="{{ gejala.kodeGejala }}">
+                                        <label class="form-check-label" for="gejala_{{ gejala.kodeGejala }}">
+                                            <strong>{{ gejala.kodeGejala }}</strong> - {{ gejala.namaGejala }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                Tidak ada gejala yang tersedia saat ini.
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">Diagnosa</button>
-                    <a href="{% url 'dashboard_pasien' %}" class="btn btn-secondary">Batal</a>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Diagnosa Sekarang</button>
+                        <a href="{% url 'dashboard_pasien' %}" class="btn btn-secondary">Batal</a>
+                    </div>
                 </form>
             </div>
         </div>

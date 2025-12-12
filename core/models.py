@@ -123,7 +123,12 @@ class PengukuranFisik(models.Model):
     tanggalUkur = models.DateField()
     beratBadan = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Berat Badan (kg)") 
     tinggiBadan = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Tinggi/Panjang Badan (cm)") 
-
+    
+    # Tambahan field untuk data Posyandu
+    lingkarKepala = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Lingkar Kepala (cm)")
+    lingkarLengan = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Lingkar Lengan Atas (cm)")
+    imunisasi = models.CharField(max_length=100, blank=True, null=True, verbose_name="Status Imunisasi")
+    
     # Kolom untuk menyimpan hasil perhitungan Z-Score
     skor_Z_BB_U = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Z-Score BB/U")
     skor_Z_TB_U = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Z-Score TB/U")
@@ -131,7 +136,7 @@ class PengukuranFisik(models.Model):
     class Meta:
         ordering = ['tanggalUkur']
         verbose_name_plural = "Pengukuran Fisik"
-
+    
     def __str__(self):
         return f"Pengukuran {self.pasien.nama} pada {self.tanggalUkur}"
 
