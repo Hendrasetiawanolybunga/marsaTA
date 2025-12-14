@@ -3,15 +3,9 @@
 {% block title %}Buat Kelompok Aturan - Panel Pakar{% endblock %}
 
 {% block content %}
+{% comment %} Header is defined in base.html and populated via context variables {% endcomment %}
 <div class="row">
     <div class="col-md-12">
-        <h1>Buat Kelompok Aturan Baru</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'list_rules_pakar' %}">Daftar Aturan</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Buat Kelompok Aturan</li>
-            </ol>
-        </nav>
         
         <div class="card">
             <div class="card-header">

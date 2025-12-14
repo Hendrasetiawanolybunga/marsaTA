@@ -26,9 +26,15 @@
                 <h3 class="mb-0">Hasil Diagnosa: {{ kondisi.namaKondisi }}</h3>
             </div>
             <div class="card-body">
+                {% if diagnosis_parsial %}
+                <div class="alert alert-warning">
+                    <strong>Diagnosis Parsial:</strong> Berikut adalah kondisi yang paling cocok berdasarkan gejala yang Anda pilih. Hasil ini merupakan perkiraan berdasarkan kecocokan parsial.
+                </div>
+                {% else %}
                 <div class="alert alert-info">
                     <strong>Diagnosis Berhasil!</strong> Berikut adalah hasil diagnosa berdasarkan gejala yang Anda pilih.
                 </div>
+                {% endif %}
                 
                 <div class="row">
                     <div class="col-md-12">

@@ -9,63 +9,8 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            padding-top: 60px;
-            background-color: #f8f9fa;
-        }
-        .navbar-brand {
-            font-weight: 600;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #4CAF50, #8BC34A);
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #4CAF50, #2E7D32);
-            border: none;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #43A047, #1B5E20);
-        }
-        .footer {
-            margin-top: 50px;
-            padding: 20px 0;
-            border-top: 1px solid #eee;
-            background-color: #ffffff;
-        }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: none;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,.1);
-        }
-        .section-spacing {
-            margin: 30px 0;
-        }
-        /* Reduce header sizes in content area */
-        .container h1 {
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
-        }
-        .container h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.875rem;
-        }
-        .container h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-        .container h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.625rem;
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -88,19 +33,27 @@
                 <!-- Right-aligned items -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated and user.is_staff %}
-                        <!-- Staff Navigation -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Panel Pakar
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'list_patients_pakar' %}">Daftar Pasien</a></li>
-                                <li><a class="dropdown-item" href="{% url 'list_rules_pakar' %}">Daftar Aturan</a></li>
-                                <li><a class="dropdown-item" href="{% url 'create_rule_group' %}">Buat Aturan Baru</a></li>
-                            </ul>
+                        <!-- Staff Navigation - Direct Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard_pakar' %}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'admin:logout' %}">Logout Pakar</a>
+                            <a class="nav-link" href="{% url 'list_patients_pakar' %}">Daftar Pasien</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'list_rules_pakar' %}">Daftar Aturan</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'list_gejala_pakar' %}">Gejala</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'list_kondisi_pakar' %}">Kondisi</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'pakar_help' %}">Cara Penggunaan</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout_pakar' %}">Logout Pakar</a>
                         </li>
                     {% elif 'pasien_id' in request.session %}
                         <!-- Patient Navigation -->
@@ -133,15 +86,40 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container">
+    <div class="container mt-5 pt-4">
+        {% block header %}
+        {% if page_title %}
+     
+        {% if breadcrumb_items %}
+        <div class="breadcrumb-card">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% for item in breadcrumb_items %}
+                        {% if item.1 %}
+                            {% if not forloop.last %}
+                            <li class="breadcrumb-item"><a href="{% url item.1 %}">{{ item.0 }}</a></li>
+                            {% else %}
+                            <li class="breadcrumb-item active" aria-current="page">{{ item.0 }}</li>
+                            {% endif %}
+                        {% else %}
+                            <li class="breadcrumb-item active" aria-current="page">{{ item.0 }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endblock %}
+        
         {% block content %}
         <!-- Page content will be placed here -->
         {% endblock %}
     </div>
 
     <!-- Footer -->
-    <footer class="footer bg-light">
-        <div class="container text-center">
+    <footer class="footer bg-light mt-5">
+        <div class="container text-center py-4">
             <span class="text-muted">© 2025 Sistem Diagnosa Stunting. All rights reserved.</span>
         </div>
     </footer>

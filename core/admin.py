@@ -10,13 +10,11 @@ class RestrictedModelAdmin(admin.ModelAdmin):
     """
     def has_module_permission(self, request):
         # Allow access only if user is staff and belongs to "Pakar Diagnosa" group
-        # Superusers (Admin) are not allowed
+        # Superusers (Admin) are not allowed to access KB models
         if request.user.is_authenticated and request.user.is_staff:
-            if request.user.is_superuser:
-                # Superusers (Admin) are not allowed to access KB models
-                return False
-            elif request.user.groups.filter(name='Pakar Diagnosa').exists():
-                # Pakar Diagnosa can access
+            # Check if user is NOT a superuser (admins are superusers)
+            # Only non-superusers who are in Pakar Diagnosa group can access
+            if not request.user.is_superuser and request.user.groups.filter(name='Pakar Diagnosa').exists():
                 return True
         return False
     

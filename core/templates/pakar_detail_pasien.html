@@ -3,15 +3,9 @@
 {% block title %}Detail Pasien - Panel Pakar{% endblock %}
 
 {% block content %}
+{% comment %} Header is defined in base.html and populated via context variables {% endcomment %}
 <div class="row">
     <div class="col-md-12">
-        <h1>Detail Pasien: {{ pasien.nama }}</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'list_patients_pakar' %}">Daftar Pasien</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Detail Pasien</li>
-            </ol>
-        </nav>
         
         <div class="card mb-4">
             <div class="card-header">

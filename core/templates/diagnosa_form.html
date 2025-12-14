@@ -34,9 +34,9 @@
                             <div class="card h-100">
                                 <div class="card-body">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="gejala_{{ gejala.kodeGejala }}" name="gejala" value="{{ gejala.kodeGejala }}">
-                                        <label class="form-check-label" for="gejala_{{ gejala.kodeGejala }}">
-                                            <strong>{{ gejala.kodeGejala }}</strong> - {{ gejala.namaGejala }}
+                                        <input class="form-check-input diagnosis-checkbox" type="checkbox" name="gejala" value="{{ gejala.kodeGejala }}" id="gejala_{{ gejala.kodeGejala }}">
+                                        <label class="form-check-label fw-bold" for="gejala_{{ gejala.kodeGejala }}">
+                                            <h6 class="mb-0"><strong>{{ gejala.kodeGejala }}</strong> - {{ gejala.namaGejala }}</h6>
                                         </label>
                                     </div>
                                 </div>

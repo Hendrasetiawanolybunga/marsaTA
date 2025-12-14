@@ -168,21 +168,8 @@ JAZZMIN_SETTINGS = {
     # Top Menu #
     ############
 
-    # Links to put along the top menu
-    "topmenu_links": [
-
-        # Url that gets reversed (Permissions can be added)
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-
-        # external url that opens in a new window (Permissions can be added)
-        # {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
-
-        # model admin to link to (Permissions checked against model)
-        {"model": "auth.User"},
-
-        # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "core"},
-    ],
+    # Links to put along the top menu - REMOVED to centralize navigation in sidebar
+    "topmenu_links": [],
 
     #############
     # User Menu #
@@ -218,8 +205,7 @@ JAZZMIN_SETTINGS = {
         "core": [{
             "name": "Dashboard Pasien",
             "url": "/dashboard/",
-            "icon": "fas fa-user-md",
-            "permissions": ["core.view_pasien"]
+            "icon": "fas fa-tachometer-alt",
         }]
     },
 
@@ -229,13 +215,13 @@ JAZZMIN_SETTINGS = {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-        "core.Pasien": "fas fa-user-injured",
-        "core.Konsultasi": "fas fa-file-medical",
-        "core.DetailKonsultasi": "fas fa-file-medical-alt",
+        "core.Pasien": "fas fa-child",
         "core.Gejala": "fas fa-heartbeat",
         "core.Kondisi": "fas fa-diagnoses",
-        "core.Aturan": "fas fa-list",
-        "core.PengukuranFisik": "fas fa-ruler-vertical",
+        "core.Aturan": "fas fa-list-alt",
+        "core.Konsultasi": "fas fa-file-medical",
+        "core.DetailKonsultasi": "fas fa-file-medical-alt",
+        "core.PengukuranFisik": "fas fa-weight",
         "core.Notifikasi": "fas fa-bell",
     },
     # Icons that are used when one is not manually specified
