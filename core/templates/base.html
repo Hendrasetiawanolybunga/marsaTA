@@ -32,8 +32,8 @@
                 
                 <!-- Right-aligned items -->
                 <ul class="navbar-nav">
-                    {% if user.is_authenticated and user.is_staff %}
-                        <!-- Staff Navigation - Direct Links -->
+                    {% if user.is_authenticated and user.is_staff and not user.is_superuser %}
+                        <!-- Expert Navigation - Direct Links -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'dashboard_pakar' %}">Dashboard</a>
                         </li>
@@ -54,6 +54,14 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout_pakar' %}">Logout Pakar</a>
+                        </li>
+                    {% elif user.is_authenticated and user.is_superuser %}
+                        <!-- Admin Navigation - Redirect to Django Admin -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">Admin Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:logout' %}">Logout Admin</a>
                         </li>
                     {% elif 'pasien_id' in request.session %}
                         <!-- Patient Navigation -->

@@ -16,6 +16,10 @@ from django import forms
 def is_staff(user):
     return user.is_staff
 
+# Helper function to check if user is an expert (staff but not superuser with Pakar Diagnosa group)
+def is_expert(user):
+    return user.is_staff and not user.is_superuser and user.groups.filter(name='Pakar Diagnosa').exists()
+
 # Index view - redirect authenticated users to appropriate dashboard
 def home(request):
     # If user is staff, redirect to expert dashboard
@@ -541,7 +545,7 @@ def tampilkan_grafik_riwayat(request, pasien_id):
 
 # Expert/Admin Views
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_rule_group(request):
     """
     View untuk membuat satu Kelompok Aturan (Rule Group) baru
@@ -611,7 +615,7 @@ def create_rule_group(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def list_patients_pakar(request):
     """
     View untuk menampilkan daftar semua Pasien
@@ -632,7 +636,7 @@ def list_patients_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def detail_pasien_pakar(request, pasien_id):
     """
     View untuk menampilkan ringkasan data Pasien untuk Pakar
@@ -664,7 +668,7 @@ def detail_pasien_pakar(request, pasien_id):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def list_rules_pakar(request):
     """
     View untuk menampilkan daftar semua Aturan yang terstruktur
@@ -691,7 +695,7 @@ def list_rules_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def show_rule_detail(request, pk):
     """
     View untuk menampilkan detail aturan diagnosa
@@ -727,7 +731,7 @@ def show_rule_detail(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_rule_pakar(request, pk):
     """
     View untuk mengedit semua aturan yang terkait dengan satu Kondisi
@@ -784,7 +788,7 @@ def edit_rule_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_rule_pakar(request, pk):
     """
     View untuk menghapus semua aturan yang terkait dengan satu Kondisi
@@ -812,7 +816,7 @@ def delete_rule_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def dashboard_pakar(request):
     """
     View untuk dashboard Pakar - menampilkan statistik sistem
@@ -838,7 +842,7 @@ def dashboard_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def pakar_help(request):
     """
     View untuk halaman bantuan penggunaan sistem bagi Pakar
@@ -887,7 +891,7 @@ def login_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def list_gejala_pakar(request):
     """
     View untuk menampilkan daftar semua Gejala
@@ -907,7 +911,7 @@ def list_gejala_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_gejala_pakar(request):
     """
     View untuk membuat Gejala baru
@@ -978,7 +982,7 @@ def create_gejala_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_gejala_pakar(request, pk):
     """
     View untuk mengedit Gejala
@@ -1025,7 +1029,7 @@ def edit_gejala_pakar(request, pk):
             })
         
         # Cek apakah kode gejala sudah ada (selain untuk gejala ini sendiri)
-        if Gejala.objects.filter(kodeGejala=kode_gejala).exclude(id=pk).exists():
+        if Gejala.objects.filter(kodeGejala=kode_gejala).exclude(kodeGejala=pk).exists():
             return render(request, 'pakar_form_gejala.html', {
                 'gejala': gejala,
                 'error': 'Kode gejala sudah ada',
@@ -1059,7 +1063,7 @@ def edit_gejala_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_gejala_pakar(request, pk):
     """
     View untuk menghapus Gejala
@@ -1074,7 +1078,7 @@ def delete_gejala_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def list_kondisi_pakar(request):
     """
     View untuk menampilkan daftar semua Kondisi
@@ -1094,7 +1098,7 @@ def list_kondisi_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_kondisi_pakar(request):
     """
     View untuk membuat Kondisi baru
@@ -1152,7 +1156,7 @@ def create_kondisi_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_kondisi_pakar(request, pk):
     """
     View untuk mengedit Kondisi
@@ -1184,7 +1188,7 @@ def edit_kondisi_pakar(request, pk):
             })
         
         # Cek apakah kode kondisi sudah ada (selain untuk kondisi ini sendiri)
-        if Kondisi.objects.filter(kodeKondisi=kode_kondisi).exclude(id=pk).exists():
+        if Kondisi.objects.filter(kodeKondisi=kode_kondisi).exclude(kodeKondisi=pk).exists():
             return render(request, 'pakar_form_kondisi.html', {
                 'kondisi': kondisi,
                 'error': 'Kode kondisi sudah ada',
@@ -1219,7 +1223,7 @@ def edit_kondisi_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_kondisi_pakar(request, pk):
     """
     View untuk menghapus Kondisi
@@ -1234,7 +1238,7 @@ def delete_kondisi_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_pasien_pakar(request):
     """
     View untuk membuat Pasien baru
@@ -1318,7 +1322,7 @@ def create_pasien_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_pasien_pakar(request, pasien_id):
     """
     View untuk mengedit Pasien
@@ -1408,7 +1412,7 @@ def edit_pasien_pakar(request, pasien_id):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_pasien_pakar(request, pasien_id):
     """
     View untuk menghapus Pasien
@@ -1441,7 +1445,7 @@ def delete_pasien_pakar(request, pasien_id):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def list_pengukuran_pakar(request):
     """
     View untuk menampilkan daftar semua Pengukuran
@@ -1462,7 +1466,7 @@ def list_pengukuran_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_pengukuran_pakar(request):
     """
     View untuk membuat Pengukuran baru
@@ -1614,7 +1618,7 @@ def create_pengukuran_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_pengukuran_pakar(request, pk):
     """
     View untuk mengedit Pengukuran
@@ -1762,7 +1766,7 @@ def edit_pengukuran_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_pengukuran_pakar(request, pk):
     """
     View untuk menghapus Pengukuran
@@ -1796,7 +1800,7 @@ def delete_pengukuran_pakar(request, pk):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def create_pasien_pakar(request):
     """
     View untuk membuat Pasien baru
@@ -1880,7 +1884,7 @@ def create_pasien_pakar(request):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def edit_pasien_pakar(request, pasien_id):
     """
     View untuk mengedit Pasien
@@ -1970,7 +1974,7 @@ def edit_pasien_pakar(request, pasien_id):
 
 
 @login_required
-@user_passes_test(is_staff)
+@user_passes_test(is_expert)
 def delete_pasien_pakar(request, pasien_id):
     """
     View untuk menghapus Pasien
